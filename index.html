@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>دفتر المواعيد</title>
+<style>
+:root{--bg:#F2F5F3;--sf:#fff;--ink:#12302F;--mut:#5F7C78;--line:#DCE5E1;--brand:#0F5C5A;--on:#fff;--ok:#1F7A58;--okbg:#DDF1E8;--warn:#8F5200;--warnbg:#FBEBCF;--bad:#B73232;--badbg:#F8DCDC}
+:root[data-t=dark]{--bg:#0D1A1B;--sf:#13262A;--ink:#E4F0ED;--mut:#8FAFAA;--line:#233B3F;--brand:#47B8AD;--on:#062624;--ok:#6FD3A8;--okbg:#163A2E;--warn:#F2B35A;--warnbg:#3A2C12;--bad:#F08A8A;--badbg:#3F1D1D}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans Arabic","Cairo",system-ui,sans-serif;padding-top:env(safe-area-inset-top)}
+#top{padding:18px 20px 6px}
+#top h1{font-size:28px;font-weight:800}
+#top p{color:var(--mut);font-size:14px}
+#view{padding:8px 0 160px}
+input,select,textarea{font:inherit;color:inherit;background:var(--sf);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.search{display:block;margin:8px 20px;width:calc(100% - 40px)}
+.chips{display:flex;gap:8px;padding:6px 20px 10px;overflow-x:auto}
+.chip{padding:7px 14px;border-radius:99px;border:1px solid var(--line);background:var(--sf);color:var(--ink);font:inherit;font-size:14px;white-space:nowrap}
+.chip.on{background:var(--brand);color:var(--on);border-color:var(--brand)}
+.strip{display:flex;margin:10px 20px 4px;border-block:1px solid var(--line)}
+.strip div{flex:1;padding:12px 4px;text-align:center}
+.strip div+div{border-inline-start:1px solid var(--line)}
+.strip b{display:block;font-size:22px;font-weight:800;line-height:1.3}
+.strip small{color:var(--mut);font-size:12px}
+.sec{padding:20px 20px 6px;font-weight:700;font-size:15px;color:var(--mut)}
+.row{display:flex;gap:14px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--sf)}
+.row:active{background:var(--line)}
+.cd{width:58px;height:58px;border-radius:14px;display:grid;place-content:center;text-align:center;flex:none}
+.cd b{font-size:22px;line-height:1.1;font-weight:800}
+.cd small{font-size:11px}
+.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.bad{background:var(--badbg);color:var(--bad)}
+.rb{flex:1;min-width:0;display:flex;flex-direction:column}
+.rb strong{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb span{font-size:13px;color:var(--mut)}
+.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pr{font-weight:700;font-size:14px}
+.note{border-inline-start:6px solid var(--c)}
+.badge{font-size:12px;color:var(--brand);font-weight:700}
+.empty{padding:40px 20px;text-align:center;color:var(--mut)}
+.empty p{margin-bottom:16px}
+.empty .btn{width:auto;padding:12px 24px}
+#nav{position:fixed;inset:auto 0 0 0;display:flex;background:var(--sf);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+#nav button{flex:1;background:none;border:0;padding:9px 0 8px;color:var(--mut);font:inherit;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:2px}
+#nav button.on{color:var(--brand);font-weight:700}
+#nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#fab{position:fixed;inset-inline-end:20px;bottom:calc(78px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:18px;border:0;background:var(--brand);color:var(--on);font-size:32px;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:4}
+.sheet{position:fixed;inset:0;z-index:10;display:flex;align-items:flex-end}
+.sheet[hidden]{display:none}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.panel{position:relative;width:100%;max-height:92%;overflow:auto;background:var(--bg);border-radius:22px 22px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.panel h2{font-size:20px;margin-bottom:14px}
+.f{display:block;margin-bottom:12px}
+.f>span{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+.two{display:flex;gap:10px}.two>*{flex:1;min-width:0}
+.endp{font-size:14px;color:var(--brand);font-weight:700;margin:-2px 0 12px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:12px;padding:13px;background:var(--brand);color:var(--on);width:100%}
+.btn.alt{background:var(--sf);color:var(--ink);border:1px solid var(--line)}
+.btn.dng{background:var(--badbg);color:var(--bad)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.acts .full{grid-column:1/-1}
+.pill{display:inline-block;padding:4px 12px;border-radius:99px;font-weight:700;font-size:14px;margin-bottom:8px}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.kv>span:first-child{color:var(--mut);font-size:14px}
+.kv select,.kv input{width:auto;max-width:55%}
+.grp{margin:8px 20px 18px}
+.grp h3{font-size:15px;color:var(--mut);margin:12px 0 2px}
+.grp .btn{margin-top:10px}
+.cols{display:flex;gap:10px;margin-bottom:12px}
+.col{width:34px;height:34px;border-radius:50%;border:3px solid transparent;background:var(--c)}
+.col.on{border-color:var(--ink)}
+.chk{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.chk input{width:20px;height:20px}
+#toast{position:fixed;inset-inline:20px;bottom:calc(90px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;font-size:14px;text-align:center;z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header id="top"></header>
+<main id="view"></main>
+<button id="fab" data-a="add" aria-label="إضافة">+</button>
+<nav id="nav">
+  <button data-a="tab" data-v="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg>اليوم</button>
+  <button data-a="tab" data-v="subs"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>الاشتراكات</button>
+  <button data-a="tab" data-v="notes"><svg viewBox="0 0 24 24"><path d="M5 3h14v18H5zM9 8h6M9 12h6M9 16h3"/></svg>الملاحظات</button>
+  <button data-a="tab" data-v="set"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>الإعدادات</button>
+</nav>
+<div class="sheet" id="sheet" hidden><div class="scrim" data-a="close"></div><div class="panel" id="panel"></div></div>
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=n=>Number(n).toLocaleString('ar-EG',{maximumFractionDigits:2});
+const pad=n=>String(n).padStart(2,'0');
+const KEY='daftar_v1';
+const COL=['#0F5C5A','#C77A0A','#B73232','#4A6FA5','#7A5C99','#6B8E23'];
+
+/* ---------- data ---------- */
+const defaults=()=>({subs:[],notes:[],nid:1,set:{before:1,time:'09:00',cur:'ج.م',cc:'20',theme:'auto'}});
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&Array.isArray(d.subs)){const D=defaults();d.set=Object.assign(D.set,d.set);d.notes=d.notes||[];d.nid=d.nid||1;return d}}catch(e){}return defaults()}
+let S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}reschedule()}
+const getSub=id=>S.subs.find(x=>x.id===id);
+const getNote=id=>S.notes.find(x=>x.id===id);
+
+/* ---------- dates ---------- */
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const today=()=>{const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())};
+function addDur(s,n,u){const d=parse(s);if(u==='d')d.setDate(d.getDate()+n);else{const day=d.getDate();d.setMonth(d.getMonth()+n);if(d.getDate()!==day)d.setDate(0)}return iso(d)}
+const daysLeft=s=>Math.round((parse(s)-today())/864e5);
+const fmt=s=>parse(s).toLocaleDateString('ar-EG',{day:'numeric',month:'short',year:'numeric'});
+const fmtDT=s=>new Date(s).toLocaleString('ar-EG',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+const atTime=(ds,t)=>{const[h,m]=(t||'09:00').split(':').map(Number);const d=parse(ds);d.setHours(h,m,0,0);return d};
+const st=s=>{const d=daysLeft(s.end);return d<0?'bad':d<=7?'warn':'ok'};
+
+/* ---------- notifications ---------- */
+const LN=()=>window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;
+async function notifSetup(){const l=LN();if(!l)return false;try{const p=await l.requestPermissions();await l.createChannel({id:'due',name:'تنبيهات المواعيد',description:'الاشتراكات والملاحظات',importance:5,visibility:1,vibration:true,lights:true});return p.display==='granted'}catch(e){return false}}
+function buildNotifs(){
+  const out=[],now=Date.now(),T=S.set.time||'09:00',B=+S.set.before||0;
+  for(const s of S.subs){
+    const body=[s.service,s.phone].filter(Boolean).join(' - ')||'حان موعد التجديد';
+    const due=atTime(s.end,T);
+    if(due>now)out.push({id:s.id*10+1,title:'ينتهي اليوم اشتراك '+s.name,body,schedule:{at:due,allowWhileIdle:true},channelId:'due'});
+    if(B>0){const e=parse(s.end);e.setDate(e.getDate()-B);const bd=atTime(iso(e),T);
+      if(bd>now)out.push({id:s.id*10+2,title:'اشتراك '+s.name+' ينتهي بعد '+B+' يوم',body,schedule:{at:bd,allowWhileIdle:true},channelId:'due'})}
+  }
+  for(const n of S.notes){if(n.at){const d=new Date(n.at);if(d>now)out.push({id:n.id*10+3,title:n.t||'تذكير',body:(n.b||'').slice(0,120)||'حان موعد الملاحظة',schedule:{at:d,allowWhileIdle:true},channelId:'due'})}}
+  return out;
+}
+async function doResched(){const l=LN();if(!l)return;const p=await l.getPending();if(p.notifications.length)await l.cancel({notifications:p.notifications.map(n=>({id:n.id}))});const list=buildNotifs();if(list.length)await l.schedule({notifications:list})}
+let rq=Promise.resolve();
+const reschedule=()=>{rq=rq.then(doResched).catch(e=>console.log(e))};
+async function testNotif(){const l=LN();if(!l){toast('الإشعارات تعمل داخل تطبيق أندرويد فقط');return}
+  if(!await notifSetup()){toast('الإشعارات غير مسموحة. فعّلها من إعدادات الهاتف');return}
+  await l.schedule({notifications:[{id:999999,title:'إشعار تجريبي',body:'التنبيهات تعمل بشكل صحيح',schedule:{at:new Date(Date.now()+5000),allowWhileIdle:true},channelId:'due'}]});
+  toast('سيصل الإشعار بعد ٥ ثوانٍ. اخرج من التطبيق لتجربته')}
+
+/* ---------- helpers ---------- */
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
+function sheet(h){$('#panel').innerHTML=h;$('#sheet').hidden=false}
+function closeSheet(){$('#sheet').hidden=true}
+const openUrl=u=>{location.href=u};
+function waLink(s){let p=(s.phone||'').replace(/\D/g,'');if(p.startsWith('00'))p=p.slice(2);else if(p.startsWith('0'))p=S.set.cc+p.slice(1);
+  const d=daysLeft(s.end);const msg='أهلًا '+s.name+'، اشتراكك في '+(s.service||'الخدمة')+(d<0?' انتهى بتاريخ ':' ينتهي بتاريخ ')+fmt(s.end)+'. هل تريد تجديده؟';
+  return 'https://wa.me/'+p+'?text='+encodeURIComponent(msg)}
+const fld=(id,l,v,t)=>'<label class="f"><span>'+l+'</span><input id="f_'+id+'" type="'+(t||'text')+'" value="'+esc(v)+'"'+(t==='tel'?' inputmode="tel"':'')+(t==='number'?' inputmode="decimal" step="any"':'')+'></label>';
+
+/* ---------- views ---------- */
+const ui={tab:'home',q:'',f:'all'};
+function rowSub(s){const d=daysLeft(s.end),k=st(s);
+  const big=d<0?'-'+num(-d):num(d),lab=d<0?'يوم تأخير':d===0?'اليوم':'يوم';
+  return '<div class="row" data-a="sub" data-id="'+s.id+'"><div class="cd '+k+'"><b>'+big+'</b><small>'+lab+'</small></div><div class="rb"><strong>'+esc(s.name)+'</strong><span>'+esc(s.service||'بدون خدمة')+'</span><span>ينتهي '+fmt(s.end)+'</span></div>'+(s.price?'<div class="pr">'+num(s.price)+' '+esc(S.set.cur)+'</div>':'')+'</div>'}
+function rowNote(n){return '<div class="row note" data-a="note" data-id="'+n.id+'" style="--c:'+COL[n.c||0]+'"><div class="rb"><strong>'+esc(n.t||'بدون عنوان')+'</strong>'+(n.b?'<span class="clamp">'+esc(n.b)+'</span>':'')+(n.at?'<span class="badge">تذكير '+fmtDT(n.at)+'</span>':'')+'</div>'+(n.pin?'<span class="badge">مثبتة</span>':'')+'</div>'}
+function vHome(){
+  const act=S.subs.filter(s=>daysLeft(s.end)>=0),soon=S.subs.filter(s=>st(s)==='warn'),exp=S.subs.filter(s=>st(s)==='bad');
+  const mo=act.reduce((a,s)=>a+(s.price||0)/(s.u==='m'?s.n:s.n/30),0);
+  const need=S.subs.filter(s=>daysLeft(s.end)<=7).sort((a,b)=>daysLeft(a.end)-daysLeft(b.end));
+  const rem=S.notes.filter(n=>n.at&&new Date(n.at)>new Date()).sort((a,b)=>new Date(a.at)-new Date(b.at)).slice(0,3);
+  let h='<div class="strip"><div><b>'+num(act.length)+'</b><small>نشطة</small></div><div><b>'+num(soon.length)+'</b><small>قريبة</small></div><div><b>'+num(exp.length)+'</b><small>منتهية</small></div><div><b>'+num(Math.round(mo))+'</b><small>'+esc(S.set.cur)+' شهريًا</small></div></div>';
+  if(!S.subs.length)return h+'<div class="empty"><p>لا توجد اشتراكات بعد. أضف أول اشتراك وسيصلك تنبيه قبل موعد انتهائه.</p><button class="btn" data-a="newsub">إضافة اشتراك</button></div>';
+  h+='<div class="sec">تحتاج انتباهك</div>';
+  h+=need.length?need.map(rowSub).join(''):'<div class="empty"><p>لا شيء ينتهي خلال الأسبوع القادم.</p></div>';
+  if(rem.length)h+='<div class="sec">تذكيرات قادمة</div>'+rem.map(rowNote).join('');
+  return h}
+function subsHtml(){
+  const q=ui.q.trim().toLowerCase();
+  const L=S.subs.filter(s=>{const d=daysLeft(s.end),k=st(s);
+    if(ui.f==='ok'&&d<0)return false;if(ui.f==='warn'&&k!=='warn')return false;if(ui.f==='bad'&&k!=='bad')return false;
+    return !q||[s.name,s.phone,s.service,s.note].join(' ').toLowerCase().includes(q)}).sort((a,b)=>daysLeft(a.end)-daysLeft(b.end));
+  return L.length?L.map(rowSub).join(''):'<div class="empty"><p>'+(S.subs.length?'لا توجد نتائج مطابقة.':'لا توجد اشتراكات بعد.')+'</p>'+(S.subs.length?'':'<button class="btn" data-a="newsub">إضافة اشتراك</button>')+'</div>'}
+function vSubs(){
+  const F=[['all','الكل'],['ok','نشطة'],['warn','قريبة الانتهاء'],['bad','منتهية']];
+  return '<input class="search" id="q" placeholder="ابحث بالاسم أو الرقم أو الخدمة" value="'+esc(ui.q)+'"><div class="chips">'+F.map(f=>'<button class="chip'+(ui.f===f[0]?' on':'')+'" data-a="filter" data-v="'+f[0]+'">'+f[1]+'</button>').join('')+'</div><div id="list">'+subsHtml()+'</div>'}
+function notesHtml(){
+  const q=ui.q.trim().toLowerCase();
+  const L=S.notes.filter(n=>!q||((n.t||'')+' '+(n.b||'')).toLowerCase().includes(q)).sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||(b.u||0)-(a.u||0));
+  return L.length?L.map(rowNote).join(''):'<div class="empty"><p>'+(S.notes.length?'لا توجد نتائج مطابقة.':'لا توجد ملاحظات بعد.')+'</p>'+(S.notes.length?'':'<button class="btn" data-a="newnote">كتابة ملاحظة</button>')+'</div>'}
+function vNotes(){return '<input class="search" id="q" placeholder="ابحث في الملاحظات" value="'+esc(ui.q)+'"><div id="list">'+notesHtml()+'</div>'}
+function vSet(){const s=S.set;return '<div class="grp"><h3>التنبيهات</h3>'+
+  '<div class="kv"><span>تنبيه قبل الانتهاء</span><select data-s="before">'+[0,1,2,3,5,7].map(d=>'<option value="'+d+'"'+(+s.before===d?' selected':'')+'>'+(d?num(d)+' يوم':'يوم الانتهاء فقط')+'</option>').join('')+'</select></div>'+
+  '<div class="kv"><span>وقت التنبيه</span><input type="time" data-s="time" value="'+esc(s.time)+'"></div>'+
+  '<button class="btn alt" data-a="perm">السماح بالإشعارات</button><button class="btn alt" data-a="test">تجربة إشعار الآن</button></div>'+
+  '<div class="grp"><h3>عام</h3>'+
+  '<div class="kv"><span>العملة</span><input data-s="cur" value="'+esc(s.cur)+'"></div>'+
+  '<div class="kv"><span>مفتاح الدولة للواتساب</span><input data-s="cc" inputmode="numeric" value="'+esc(s.cc)+'"></div>'+
+  '<div class="kv"><span>المظهر</span><select data-s="theme">'+[['auto','حسب الهاتف'],['light','فاتح'],['dark','داكن']].map(t=>'<option value="'+t[0]+'"'+(s.theme===t[0]?' selected':'')+'>'+t[1]+'</option>').join('')+'</select></div></div>'+
+  '<div class="grp"><h3>النسخ الاحتياطي</h3><button class="btn alt" data-a="copy">نسخ كل البيانات</button><button class="btn alt" data-a="imp">استيراد نسخة</button><button class="btn dng" data-a="wipe">مسح كل البيانات</button></div>'}
+
+function applyTheme(){const t=S.set.theme,d=t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.t=d?'dark':'light'}
+function render(){
+  applyTheme();
+  const T={home:'اليوم',subs:'الاشتراكات',notes:'الملاحظات',set:'الإعدادات'};
+  $('#top').innerHTML='<h1>'+T[ui.tab]+'</h1><p>'+new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'})+'</p>';
+  $('#view').innerHTML=({home:vHome,subs:vSubs,notes:vNotes,set:vSet})[ui.tab]();
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===ui.tab));
+  $('#fab').style.display=ui.tab==='set'?'none':'block';
+}
+
+/* ---------- subscription sheets ---------- */
+function formSub(id){
+  const s=id?getSub(id):{n:1,u:'m',start:iso(today())};
+  sheet('<h2>'+(id?'تعديل الاشتراك':'اشتراك جديد')+'</h2>'+fld('name','اسم الشخص',s.name)+
+  '<div class="two">'+fld('phone','الهاتف',s.phone,'tel')+fld('price','السعر',s.price||'','number')+'</div>'+fld('service','الخدمة أو الباقة',s.service)+
+  '<div class="two">'+fld('start','تاريخ البداية',s.start,'date')+'<label class="f"><span>المدة</span><div class="two"><input id="f_n" class="dur" type="number" min="1" value="'+s.n+'"><select id="f_u" class="dur"><option value="m"'+(s.u==='m'?' selected':'')+'>شهر</option><option value="d"'+(s.u==='d'?' selected':'')+'>يوم</option></select></div></label></div>'+
+  '<p class="endp" id="endp"></p><label class="f"><span>ملاحظات</span><textarea id="f_note" rows="2">'+esc(s.note)+'</textarea></label>'+
+  '<button class="btn" data-a="savesub" data-id="'+(id||'')+'">حفظ</button>');
+  updEnd()}
+function updEnd(){const e=addDur($('#f_start').value||iso(today()),Math.max(1,+$('#f_n').value||1),$('#f_u').value);$('#endp').textContent='ينتهي في '+fmt(e)}
+function saveSub(id){
+  const g=x=>$('#f_'+x).value.trim();
+  if(!g('name')){toast('اكتب اسم الشخص أولًا');return}
+  const o={name:g('name'),phone:g('phone'),service:g('service'),price:parseFloat(g('price'))||0,start:$('#f_start').value||iso(today()),n:Math.max(1,parseInt($('#f_n').value)||1),u:$('#f_u').value,note:g('note')};
+  o.end=addDur(o.start,o.n,o.u);
+  if(id)Object.assign(getSub(id),o);else{o.id=S.nid++;o.paid=o.price;o.renews=0;S.subs.push(o)}
+  save();closeSheet();render();toast('تم الحفظ')}
+function detail(id){
+  const s=getSub(id);if(!s)return;const d=daysLeft(s.end),k=st(s);
+  const kv=(a,b)=>b?'<div class="kv"><span>'+a+'</span><span>'+b+'</span></div>':'';
+  sheet('<h2>'+esc(s.name)+'</h2><span class="pill '+k+'">'+(d<0?'انتهى منذ '+num(-d)+' يوم':d===0?'ينتهي اليوم':'متبقي '+num(d)+' يوم')+'</span>'+
+  kv('الخدمة',esc(s.service))+kv('الهاتف',esc(s.phone))+kv('السعر',s.price?num(s.price)+' '+esc(S.set.cur):'')+kv('البداية',fmt(s.start))+kv('الانتهاء',fmt(s.end))+kv('مرات التجديد',s.renews?num(s.renews):'')+kv('إجمالي المدفوع',s.paid?num(s.paid)+' '+esc(S.set.cur):'')+kv('ملاحظات',esc(s.note))+
+  '<div class="acts"><button class="btn full" data-a="renew" data-id="'+id+'">تجديد '+num(s.n)+(s.u==='m'?' شهر':' يوم')+'</button>'+
+  (s.phone?'<button class="btn alt" data-a="wa" data-id="'+id+'">واتساب</button><button class="btn alt" data-a="call" data-id="'+id+'">اتصال</button>':'')+
+  '<button class="btn alt" data-a="edit" data-id="'+id+'">تعديل</button><button class="btn dng" data-a="delsub" data-id="'+id+'">حذف</button></div>')}
+function renew(id){const s=getSub(id);const base=daysLeft(s.end)>=0?s.end:iso(today());s.start=base;s.end=addDur(base,s.n,s.u);s.paid=(s.paid||0)+(s.price||0);s.renews=(s.renews||0)+1;save();closeSheet();render();toast('تم التجديد حتى '+fmt(s.end))}
+
+/* ---------- note sheets ---------- */
+let draftC=0;
+function formNote(id){
+  const n=id?getNote(id):{c:0};draftC=n.c||0;
+  sheet('<h2>'+(id?'تعديل الملاحظة':'ملاحظة جديدة')+'</h2>'+fld('t','العنوان',n.t)+'<label class="f"><span>النص</span><textarea id="f_b" rows="6">'+esc(n.b)+'</textarea></label>'+
+  '<div class="cols">'+COL.map((c,i)=>'<button class="col'+(i===draftC?' on':'')+'" style="--c:'+c+'" data-a="col" data-v="'+i+'" aria-label="لون '+(i+1)+'"></button>').join('')+'</div>'+
+  '<label class="chk"><input type="checkbox" id="f_pin"'+(n.pin?' checked':'')+'>تثبيت في أعلى القائمة</label>'+
+  '<label class="f"><span>تذكير بإشعار (اختياري)</span><input id="f_at" type="datetime-local" value="'+esc(n.at)+'"></label>'+
+  '<div class="acts"><button class="btn full" data-a="savenote" data-id="'+(id||'')+'">حفظ</button>'+(id?'<button class="btn dng full" data-a="delnote" data-id="'+id+'">حذف</button>':'')+'</div>')}
+function saveNote(id){
+  const t=$('#f_t').value.trim(),b=$('#f_b').value.trim(),at=$('#f_at').value;
+  if(!t&&!b){toast('اكتب عنوانًا أو نصًا');return}
+  if(at&&new Date(at)<=new Date()){toast('اختر وقتًا للتذكير في المستقبل');return}
+  const o={t,b,c:draftC,pin:$('#f_pin').checked,at,u:Date.now()};
+  if(id)Object.assign(getNote(id),o);else{o.id=S.nid++;S.notes.push(o)}
+  save();closeSheet();render()}
+
+/* ---------- backup ---------- */
+async function copyData(){const t=JSON.stringify(S);try{await navigator.clipboard.writeText(t);toast('تم نسخ البيانات')}catch(e){sheet('<h2>نسخ البيانات</h2><textarea rows="8" readonly onfocus="this.select()">'+esc(t)+'</textarea>')}}
+function doImport(){try{const d=JSON.parse($('#f_imp').value);if(!Array.isArray(d.subs)||!Array.isArray(d.notes))throw 0;
+  if(!confirm('سيتم استبدال البيانات الحالية. متابعة؟'))return;
+  const D=defaults();S=Object.assign(D,d);S.set=Object.assign(defaults().set,d.set);save();closeSheet();render();toast('تم الاستيراد')}catch(e){toast('النص غير صالح')}}
+
+/* ---------- actions ---------- */
+const ACT={
+  tab:(_,t)=>{ui.tab=t.dataset.v;ui.q='';ui.f='all';render();scrollTo(0,0)},
+  close:closeSheet,
+  add:()=>ui.tab==='notes'?formNote():formSub(),
+  newsub:()=>formSub(),newnote:()=>formNote(),
+  filter:(_,t)=>{ui.f=t.dataset.v;render()},
+  sub:id=>detail(id),note:id=>formNote(id),edit:id=>formSub(id),
+  savesub:id=>saveSub(id),savenote:id=>saveNote(id),
+  renew:id=>renew(id),
+  wa:id=>openUrl(waLink(getSub(id))),
+  call:id=>openUrl('tel:'+getSub(id).phone.replace(/[^\d+]/g,'')),
+  delsub:id=>{if(confirm('حذف هذا الاشتراك؟')){S.subs=S.subs.filter(x=>x.id!==id);save();closeSheet();render()}},
+  delnote:id=>{if(confirm('حذف هذه الملاحظة؟')){S.notes=S.notes.filter(x=>x.id!==id);save();closeSheet();render()}},
+  col:(_,t)=>{draftC=+t.dataset.v;document.querySelectorAll('.col').forEach((b,i)=>b.classList.toggle('on',i===draftC))},
+  perm:async()=>{toast(await notifSetup()?'الإشعارات مفعّلة':'الإشعارات غير مسموحة. فعّلها من إعدادات الهاتف')},
+  test:testNotif,copy:copyData,
+  imp:()=>sheet('<h2>استيراد البيانات</h2><label class="f"><span>الصق النسخة الاحتياطية هنا</span><textarea id="f_imp" rows="8"></textarea></label><button class="btn" data-a="doimp">استيراد</button>'),
+  doimp:doImport,
+  wipe:()=>{if(confirm('سيتم حذف كل الاشتراكات والملاحظات نهائيًا. متابعة؟')){S=defaults();save();render();toast('تم المسح')}}
+};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const f=ACT[t.dataset.a];if(f)f(t.dataset.id?+t.dataset.id:0,t)});
+document.addEventListener('input',e=>{
+  if(e.target.id==='q'){ui.q=e.target.value;$('#list').innerHTML=ui.tab==='subs'?subsHtml():notesHtml()}
+  else if(e.target.matches('.dur,#f_start'))updEnd()});
+document.addEventListener('change',e=>{const k=e.target.dataset&&e.target.dataset.s;if(k){S.set[k]=e.target.value.trim();save();render()}});
+
+/* ---------- start ---------- */
+render();
+notifSetup().then(reschedule);
+const L=LN();
+if(L)L.addListener('localNotificationActionPerformed',e=>{const nid=e.notification.id,id=Math.floor(nid/10);
+  if(nid%10===3){ui.tab='notes';render();formNote(id)}else if(getSub(id)){ui.tab='subs';render();detail(id)}});
+const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;
+if(A){A.addListener('backButton',()=>{if(!$('#sheet').hidden)closeSheet();else if(ui.tab!=='home'){ui.tab='home';render()}else A.exitApp()});
+  A.addListener('appStateChange',s=>{if(s.isActive){render();reschedule()}})}
+</script>
+</body>
+</html>

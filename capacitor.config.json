@@ -1,0 +1,10 @@
+{
+  "appId": "com.omar.daftar",
+  "appName": "دفتر المواعيد",
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#0F5C5A"
+    }
+  }
+}
